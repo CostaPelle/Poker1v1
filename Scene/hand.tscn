@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://dspl5kkxh5l35"]
+
+[ext_resource type="Script" path="res://Scene/hand.gd" id="1_gsejh"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_j8kf8"]
+radius = 100.0
+
+[node name="Hand" type="Node2D"]
+script = ExtResource("1_gsejh")
+card_angle = 45.0
+
+[node name="DebugShape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_j8kf8")
+
+[node name="Node2D" type="Node2D" parent="."]
+position = Vector2(70, 70)
+rotation = 0.785398
