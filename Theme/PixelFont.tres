@@ -1,0 +1,10 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://c0gi7x6ivyn1o"]
+
+[ext_resource type="FontFile" uid="uid://bsdv10ien7hbm" path="res://Theme/MinimalPixelFont.ttf" id="1_3e8oj"]
+
+[resource]
+base_font = ExtResource("1_3e8oj")
+opentype_features = {
+1667329140: 0
+}
+spacing_bottom = 10
