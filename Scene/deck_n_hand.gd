@@ -7,16 +7,27 @@ extends Node2D
 
 @onready var CardSuitsList = ["Club", "Diamond", "Heart", "Spade"]
 
+var save_path = "res://SavedData/level.save"
 
 #PlayerVariables
 @export var PlayerChips: int = 50000
 var BetAmount: int
 var PlayerScore = 0
 var PlayersCards: bool
+var AbilityGiven: bool
+var PlayerCard1
+var PlayerCard2
+var Level1: bool
+var Level2: bool
+var Level3: bool
+var WinMethod: int
 
 #EnemyVariables
 @export var EnemyChips: int = 50000
 var EnemyScore = 0
+var EnemyCard1Texture
+var EnemyCard2Texture
+var enemycard1
 
 #Buttons
 @onready var PlayButton = $CanvasLayer/Play
@@ -29,6 +40,8 @@ var EnemyScore = 0
 @onready var EnemyChip = $CanvasLayer/EnemyChip
 @onready var EnemyChipCount: Label = $CanvasLayer/EnemyChipCount
 @onready var NextButton = $CanvasLayer/NextButton
+@onready var Level1UI = $TextureRect/Sprite2D
+@onready var Level1Des = $TextureRect/Level1Des
 
 var Current_Sprite = 0
 var cardvalue = 1
@@ -40,8 +53,16 @@ var TurnDown = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	load_data()
 	
+	if Level3 == false and Level2 == true and Level1 == true:
+		WinMethod = 1000000
+	if Level3 == false and Level2 == false and Level1 == true:
+		WinMethod = 500000
+	if Level3 == false and Level2 == false and Level1 == false:
+		WinMethod = 250000
 	pass # Replace with function body.
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -52,6 +73,8 @@ func _process(delta: float) -> void:
 
 func _on_button_pressed() -> void:
 	
+	Level1UI.visible = false
+	Level1Des.visible = false
 	PlayButton.visible = false
 	BetButton.visible = true
 	BetSlider.visible = true
@@ -63,6 +86,11 @@ func _on_button_pressed() -> void:
 	var PlayerCards = $CanvasLayer/PlayedCards
 	var ClickedCards = $CanvasLayer/ClickedCards
 	var Deck = $CanvasLayer/Deck
+	
+	
+	if AbilityGiven == false:
+		GiveAbility1()
+		GiveAbility2()
 	
 	EnemyChipCount.set_text(str(EnemyChips))
 	
@@ -86,6 +114,7 @@ func _on_button_pressed() -> void:
 		#CreatePlayerCards
 	if Current_Sprite > 51:
 		var Card1 = Deck.get_child(randi() % Deck.get_child_count())
+		PlayerCard1 = Card1
 			
 		Card1.set_visible(true)
 		Card1.position = Vector2(505,400)
@@ -94,6 +123,7 @@ func _on_button_pressed() -> void:
 		Card1.reparent(PlayerHand)
 		
 		var Card2 = Deck.get_child(randi() % Deck.get_child_count())
+		PlayerCard2 = Card2
 		print(Card2)
 		Card2.set_visible(true)
 		Card2.position = Vector2(405,400)
@@ -102,12 +132,15 @@ func _on_button_pressed() -> void:
 		Card2.reparent(PlayerHand)
 			
 		var EnemyCard1 = Deck.get_child(randi() % Deck.get_child_count())
-			
+		
+		enemycard1 = EnemyCard1
+		
 		EnemyCard1.set_visible(true)
 		EnemyCard1.position = Vector2(505,25)
 		EnemyCard1.scale = Vector2(.5,.5)
 		EnemyCard1.EnemyCard = true
 		var EnemyCard1Sprite = EnemyCard1.get_node("Sprite2D")
+		EnemyCard1Texture = EnemyCard1Sprite.texture.resource_path
 		EnemyCard1Sprite.texture = preload("res://CardAssets/assets/card_back.png")
 		EnemyCard1.reparent(EnemyHand)
 			
@@ -238,6 +271,9 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 		PlayerChipsField.text = str(PlayerChips)
 		NextButton.visible = true
 		BetSlider.ResetSliderAmount()
+		if PlayerChips >= WinMethod:
+			Win()
+			return
 		return
 	if PlayerScore == EnemyScore:
 		if tie_result == 1:
@@ -247,11 +283,17 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 			PlayerChipsField.text = str(PlayerChips)
 			NextButton.visible = true
 			BetSlider.ResetSliderAmount()
+			if PlayerChips >= WinMethod:
+				Win()
+				return
 			return
 		if tie_result == 2:
 			PlayerScoreLabel.visible = true
 			PlayerScoreLabel.text = "LOSE"
 			NextButton.visible = true
+			if PlayerChips <= 5:
+				Lose()
+				return
 			return
 		if tie_result == 3:
 			PlayerScoreLabel.visible = true
@@ -260,21 +302,21 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 			PlayerChipsField.text = str(PlayerChips)
 			BetSlider.ResetSliderAmount()
 			NextButton.visible = true
+			if PlayerChips <= 5:
+				Lose()
+				return
 			return
 	if EnemyScore > PlayerScore:
 		PlayerScoreLabel.visible = true
 		PlayerScoreLabel.text = "LOSE"
 		NextButton.visible = true
+		if PlayerChips <= 5:
+				Lose()
+				return
 		return
 	pass
 	
-func Tie():
-		PlayerScoreLabel.visible = true
-		PlayerScoreLabel.text = "TIE"
-		PlayerChips += BetAmount * .5
-		PlayerChipsField.text = str(PlayerChips)
-		BetSlider.ResetSliderAmount()
-		NextButton.visible = true
+
 
 func ResetCards():
 	
@@ -341,3 +383,121 @@ func UnclickedCards(Index: int, player_cards: bool):
 		UnselectedCard.position.y += 12
 		UnselectedCard.reparent($CanvasLayer/PlayerHand)
 	
+
+
+
+func GiveAbility1():
+	
+	var PeekAbility = $CanvasLayer/Ability1/Peek
+	var HandRerollAbility = $CanvasLayer/Ability1/HandReroll
+	var rng = randi_range(1, 1)
+	
+	if rng == 1:
+		PeekAbility.visible = true
+	if rng == 2:
+		HandRerollAbility.visible = true
+	AbilityGiven = true
+	pass
+
+func GiveAbility2():
+	
+	var PeakAbility = $CanvasLayer/Ability2/Peek
+	var HandRerollAbility = $CanvasLayer/Ability2/HandReroll
+	var rng = randi_range(1, 2)
+	
+	if rng == 1:
+		PeakAbility.visible = true
+	if rng == 2:
+		HandRerollAbility.visible = true
+	AbilityGiven = true
+	pass
+
+func PeekAbility():
+	var EnemyCard1Sprite = enemycard1.get_node("Sprite2D")
+	EnemyCard1Sprite.texture = load(EnemyCard1Texture)
+
+func HandReroll():
+	var Deck = $CanvasLayer/Deck
+	var PlayerHand = $CanvasLayer/PlayerHand
+	
+	PlayerCard1.visible = false
+	PlayerCard1.reparent(Deck)
+	
+	var Card1 = Deck.get_child(randi() % Deck.get_child_count())
+	PlayerCard1 = Card1
+		
+	Card1.set_visible(true)
+	Card1.position = Vector2(505,400)
+	Card1.scale = Vector2(.5,.5)
+	Card1.PlayerCard = true
+	Card1.reparent(PlayerHand)
+	
+	PlayerCard2.visible = false
+	PlayerCard2.reparent(Deck)
+	
+	var Card2 = Deck.get_child(randi() % Deck.get_child_count())
+	PlayerCard2 = Card2
+	print(Card2)
+	Card2.set_visible(true)
+	Card2.position = Vector2(405,400)
+	Card2.scale = Vector2(.5,.5)
+	Card2.PlayerCard = true
+	Card2.reparent(PlayerHand)
+
+func Win():
+	var WinLabel = $WinLabel
+	var NextButton = $WinButton
+	var CanvasLayer1 = $CanvasLayer
+	CanvasLayer1.visible = false
+	WinLabel.visible = true
+	NextButton.visible = true
+
+func Lose():
+	var LoseLabel = $LoseLabel
+	var RetryButton = $RetryButton
+	var CanvasLayer1 = $CanvasLayer
+	CanvasLayer1.visible = false
+	LoseLabel.visible = true
+	RetryButton.visible = true
+
+func _on_win_button_pressed() -> void:
+	
+	if Level3 == false and Level2 == true and Level1 == true:
+		Level3 = true
+	if Level3 == false and Level2 == false and Level1 == true:
+		Level2 = true
+	if Level3 == false and Level2 == false and Level1 == false:
+		Level1 = true
+	
+	save()
+	
+	get_tree().change_scene_to_file("res://Scene/MainMenu.tscn")
+	
+	pass # Replace with function body.
+
+
+func _on_retry_button_pressed() -> void:
+	
+	
+	get_tree().reload_current_scene()
+	
+	
+	pass # Replace with function body.
+
+func save():
+	var file = FileAccess.open(save_path, FileAccess.WRITE)
+	
+	file.store_var(Level1)
+	file.store_var(Level2)
+	file.store_var(Level3)
+
+func load_data():
+	if FileAccess.file_exists(save_path):
+		var file = FileAccess.open(save_path, FileAccess.READ)
+		Level1 = file.get_var(Level1)
+		Level2 = file.get_var(Level2)
+		Level3 = file.get_var(Level3)
+	else:
+		Level1 = false
+		Level2 = false
+		Level3 = false

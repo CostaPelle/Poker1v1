@@ -6,8 +6,9 @@ class_name Card extends Button
 @export var CardPicked: bool
 
 @onready var base_sprite: Sprite2D = $Sprite2D
+@onready var Shadow = $Shadow
 
-@onready var GameManager = get_parent().get_parent().get_parent()
+var gamemanager
 
 
 @onready var my_sprite = $Sprite2D
@@ -33,6 +34,10 @@ func _ready() -> void:
 	visible = false
 	CardClicked = false
 	
+	if GameManager.Online == true:
+		gamemanager = get_parent().get_parent()
+	if GameManager.Offline == true:
+		gamemanager = get_parent().get_parent().get_parent()
 	
 	pass # Replace with function body.
 
@@ -72,6 +77,7 @@ func _on_mouse_entered() -> void:
 		return
 	if CardClicked == false:
 		self.position += Vector2(+0,-12)
+		Shadow.visible = true
 		pass
 	
 	pass
@@ -84,14 +90,15 @@ func _on_mouse_exited() -> void:
 		return
 	if CardClicked == false:
 		self.position += Vector2(+0,12)
+		Shadow.visible = false
 		pass
 	
 	pass # Replace with function body.
 
 func ClickedCards():
-	GameManager.ClickedCards(self.get_index(), PlayerCard)
+	gamemanager.ClickedCards(self.get_index(), PlayerCard)
 	var ClickedCards = get_parent()
 	ClickedCards.get_selected_cards(self.get_index())
 func UnclickedCards():
-	GameManager.UnclickedCards(self.get_index(), PlayerCard)
+	gamemanager.UnclickedCards(self.get_index(), PlayerCard)
 	CardClicked = false

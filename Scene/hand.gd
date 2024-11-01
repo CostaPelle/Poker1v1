@@ -1,7 +1,7 @@
 @tool
 class_name Hand extends Node2D
 
-@onready var GameManager = $"../.."
+var gamemanager
 
 var PlayerScore
 var BotScore1
@@ -14,6 +14,13 @@ var clicked_cards:Hand
 var cards: Array
 var BotHand: Array
 var RoundDone: bool
+
+func _ready() -> void:
+	clicked_cards = Hand.new()
+	if GameManager.Online == true:
+		gamemanager = $".."
+	if GameManager.Offline == true:
+		gamemanager = $"../.."
 
 func evaluate_hand():
 	
@@ -58,34 +65,47 @@ func evaluate_hand():
 	if counts.size() == 2 and (counts[1] == 4):
 		print("four of a kind")
 		PlayerScore = 11.2
+		PlayerScore += sorted_value_counts[0][0] * 0.01
 		return
 	if counts.size() == 2 and (counts[1 ] == 3):
 		print("full house")
 		PlayerScore = 9.8
+		PlayerScore += sorted_value_counts[0][0] * 0.01
 		return
 	if is_flush:
 		print("flush")
 		PlayerScore = 8.4
+		for i in range(5):
+			PlayerScore += cards[i].value * (0.01 / (i + 1))
 		return
 	if is_straight:
 		print("straight")
 		PlayerScore = 7
+		PlayerScore += sorted_value_counts[0][0] * 0.01
 		return
 	if counts.size() == 3 and (counts[2] == 3):
 		print("three of a kind")
 		PlayerScore = 5.6
+		PlayerScore += sorted_value_counts[0][0] * 0.01
+		PlayerScore += sorted_value_counts[1][0] * 0.001 + sorted_value_counts[2][0] * 0.0001
 		return
 	if counts.size() == 3 and (counts[1] == 2 and counts[2] == 2):
 		print("two pair")
 		PlayerScore = 4.2
+		PlayerScore += sorted_value_counts[0][0] * 0.01 + sorted_value_counts[1][0] * 0.001
+		PlayerScore += sorted_value_counts[2][0] * 0.0001
 		return
 	if counts.size() == 4:
 		print("one pair")
 		PlayerScore = 2.8
+		PlayerScore += sorted_value_counts[0][0] * 0.01
+		PlayerScore += sorted_value_counts[1][0] * 0.001 + sorted_value_counts[2][0] * 0.0001 + sorted_value_counts[3][0] * 0.00001
 		return
 	else:
 		print("High Card")
 		PlayerScore = 1.4
+		for i in range(5):
+			PlayerScore += cards[i].value * (0.01 / (i + 1))
 		
 	pass
 	
@@ -128,9 +148,6 @@ func is_straight_bot(sorted_value_counts) -> bool:
 		if values[i] != values[i - 1]+ 1:
 			return false
 	return true
-func _ready() -> void:
-	clicked_cards = Hand.new()
-	pass # Replace with function body.
 
 
 func get_selected_cards(Index: int) -> Array:
@@ -143,8 +160,8 @@ func get_selected_cards(Index: int) -> Array:
 		cards.append(child)
 	if cards.size() > 4 and RoundDone == false:
 		evaluate_hand()
-		print(BotScore)
-		GameManager.SetScore(PlayerScore, BotScore, PlayerHand, BotHand)
+		#print(BotScore)
+		gamemanager.SetScore(PlayerScore, BotScore, PlayerHand, BotHand)
 		RoundDone = true
 	return selected_cards_array
 
@@ -284,34 +301,47 @@ func evaluate_bot_hand(hand: Array):
 	if counts.size() == 2 and (counts[1] == 4):
 		#print("four of a kind")
 		BotScore1 = 11.2
+		BotScore1 += sorted_value_counts[0][0] * 0.01
 		return BotScore1
 	if counts.size() == 2 and (counts[1 ] == 3):
 		#print("full house")
 		BotScore1 = 9.8
+		BotScore1 += sorted_value_counts[0][0] * 0.01
 		return BotScore1
 	if is_flush:
 		#print("flush")
 		BotScore1 = 8.4
+		for i in range(5):
+			BotScore1 += hand[i].value * (0.01 / (i + 1))
 		return BotScore1
 	if is_straight:
 		#print("straight")
 		BotScore1 = 7
+		BotScore1 += sorted_value_counts[0][0] * 0.01
 		return BotScore1
 	if counts.size() == 3 and (counts[2] == 3):
 		#print("three of a kind")
 		BotScore1 = 5.6
+		BotScore1 += sorted_value_counts[0][0] * 0.01
+		BotScore1 += sorted_value_counts[1][0] * 0.001 + sorted_value_counts[2][0] * 0.0001
 		return BotScore1
 	if counts.size() == 3 and (counts[1] == 2 and counts[2] == 2):
 		#print("two pair")
 		BotScore1 = 4.2
+		BotScore1 += sorted_value_counts[0][0] * 0.01 + sorted_value_counts[1][0] * 0.001  # Add pair values
+		BotScore1 += sorted_value_counts[2][0] * 0.0001
 		return BotScore1
 	if counts.size() == 4:
 		#print("one pair")
 		BotScore1 = 2.8
+		BotScore1 += sorted_value_counts[0][0] * 0.01
+		BotScore1 += sorted_value_counts[1][0] * 0.001 + sorted_value_counts[2][0] * 0.0001 + sorted_value_counts[3][0] * 0.00001
 		return BotScore1
 	else:
 		#print("High Card")
 		BotScore1 = 1.4
+		for i in range(5):
+			BotScore1 += hand[i].value * (0.01 / (i + 1))
 		return BotScore1
 	pass
 	

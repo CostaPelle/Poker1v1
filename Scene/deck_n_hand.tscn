@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://3jisg2k2ig4e"]
+[gd_scene load_steps=14 format=3 uid="uid://3jisg2k2ig4e"]
 
 [ext_resource type="Script" path="res://Scene/deck_n_hand.gd" id="1_r0d3r"]
 [ext_resource type="Script" path="res://BetButton.gd" id="2_bc7rf"]
@@ -9,6 +9,8 @@
 [ext_resource type="Theme" uid="uid://bwti3w2ekyd6x" path="res://Theme/Default.tres" id="5_dyxwo"]
 [ext_resource type="FontVariation" uid="uid://c0gi7x6ivyn1o" path="res://Theme/PixelFont.tres" id="6_advw4"]
 [ext_resource type="Script" path="res://Scene/next_button.gd" id="7_2i3nt"]
+[ext_resource type="Texture2D" uid="uid://d2nb7a2w3co8v" path="res://Art/Background/PeekAbility.png" id="10_3knjw"]
+[ext_resource type="Script" path="res://Scene/peek.gd" id="10_f2ciy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xjgpn"]
 content_margin_left = 10.0
@@ -136,6 +138,24 @@ position = Vector2(184, 50)
 scale = Vector2(1.06348, 0.938477)
 texture = ExtResource("4_hgyqo")
 
+[node name="Ability1" type="Node2D" parent="CanvasLayer"]
+position = Vector2(921, 418)
+
+[node name="Peek" type="Button" parent="CanvasLayer/Ability1"]
+visible = false
+offset_right = 28.0
+offset_bottom = 25.0
+script = ExtResource("10_f2ciy")
+
+[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer/Ability1/Peek"]
+position = Vector2(13.5, 12.5)
+scale = Vector2(0.421875, 0.390625)
+texture = ExtResource("10_3knjw")
+
+[node name="Ability2" type="Node2D" parent="CanvasLayer"]
+position = Vector2(936, 468)
+
 [connection signal="pressed" from="CanvasLayer/Bet" to="CanvasLayer/Bet" method="_on_pressed"]
 [connection signal="pressed" from="CanvasLayer/Play" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/NextButton" to="CanvasLayer/NextButton" method="_on_pressed"]
+[connection signal="pressed" from="CanvasLayer/Ability1/Peek" to="CanvasLayer/Ability1/Peek" method="_on_pressed"]
