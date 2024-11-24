@@ -1,0 +1,358 @@
+[gd_scene load_steps=23 format=3 uid="uid://cx78dci3nl0w5"]
+
+[ext_resource type="Script" path="res://player.gd" id="1_hrstj"]
+[ext_resource type="Texture2D" uid="uid://c7qso4xryja16" path="res://Art/Assets/CharacterMovement.png" id="2_bxv7a"]
+[ext_resource type="Texture2D" uid="uid://dm71t2k25dl4n" path="res://Art/Background/CheckMArk.png" id="3_p56k5"]
+[ext_resource type="Texture2D" uid="uid://dg04t3we7vahb" path="res://CardAssets/Basic_Card_Pack.png" id="4_h7bo6"]
+[ext_resource type="Script" path="res://Scene/AbilityCard.gd" id="5_vvnpa"]
+[ext_resource type="AudioStream" uid="uid://d01bmokps3xxd" path="res://Audio/CardSelected (2).mp3" id="6_et4lf"]
+[ext_resource type="AudioStream" uid="uid://btkcud1bccupb" path="res://Audio/CardUnselected.mp3" id="7_qyg2m"]
+[ext_resource type="Shader" path="res://Shader/VHSShader.gdshader" id="8_7qbvo"]
+[ext_resource type="Texture2D" uid="uid://dy2t5qbeg888r" path="res://Art/Assets/Map.png" id="8_kqrys"]
+[ext_resource type="Texture2D" uid="uid://4oh1l2m152aj" path="res://CardAssets/card_world1.png" id="9_6wm85"]
+[ext_resource type="Texture2D" uid="uid://bnsps6w0ygn6h" path="res://CardAssets/card_binoculars-export.png" id="10_lrnp3"]
+[ext_resource type="Texture2D" uid="uid://ddqtv1l5apil1" path="res://CardAssets/card_Locked.png" id="11_syrn2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7nvim"]
+atlas = ExtResource("2_bxv7a")
+region = Rect2(160, 35, 32, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_winlj"]
+atlas = ExtResource("2_bxv7a")
+region = Rect2(64, 35, 32, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_baspe"]
+atlas = ExtResource("2_bxv7a")
+region = Rect2(96, 35, 32, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4mda"]
+atlas = ExtResource("2_bxv7a")
+region = Rect2(0, 35, 32, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o2ter"]
+atlas = ExtResource("2_bxv7a")
+region = Rect2(128, 35, 32, 35)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_easmf"]
+atlas = ExtResource("2_bxv7a")
+region = Rect2(32, 35, 32, 35)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_54qh3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7nvim")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_winlj")
+}],
+"loop": false,
+"name": &"Walking",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_baspe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k4mda")
+}],
+"loop": false,
+"name": &"Walking_Down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o2ter")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_easmf")
+}],
+"loop": false,
+"name": &"Walking_Up",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_evm1r"]
+size = Vector2(27, 31)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vmol"]
+bg_color = Color(0.700802, 0.574378, 0.44602, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r2agd"]
+shader = ExtResource("8_7qbvo")
+shader_parameter/overlay = true
+shader_parameter/scanlines_opacity = 0.094
+shader_parameter/scanlines_width = 0.051
+shader_parameter/grille_opacity = 0.069
+shader_parameter/resolution = Vector2(640, 480)
+shader_parameter/pixelate = true
+shader_parameter/roll = true
+shader_parameter/roll_speed = 8.0
+shader_parameter/roll_size = 2.037
+shader_parameter/roll_variation = 0.756
+shader_parameter/distort_intensity = 0.004
+shader_parameter/noise_opacity = 0.0
+shader_parameter/noise_speed = 0.0
+shader_parameter/static_noise_intensity = 0.06
+shader_parameter/aberration = -0.00699995
+shader_parameter/brightness = 1.4
+shader_parameter/discolor = false
+shader_parameter/warp_amount = 0.08
+shader_parameter/clip_warp = false
+shader_parameter/vignette_intensity = 0.4
+shader_parameter/vignette_opacity = 0.5
+
+[node name="Player" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_hrstj")
+
+[node name="Walking" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_54qh3")
+animation = &"Walking"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1.5, 0.5)
+shape = SubResource("RectangleShape2D_evm1r")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(3, 3)
+position_smoothing_enabled = true
+
+[node name="UI" type="Node2D" parent="Camera2D"]
+light_mask = 2
+visibility_layer = 2
+
+[node name="TabContainer" type="TabContainer" parent="Camera2D/UI"]
+visible = false
+light_mask = 2
+visibility_layer = 2
+offset_left = -155.0
+offset_top = -66.0
+offset_right = 729.0
+offset_bottom = 328.0
+scale = Vector2(0.35, 0.35)
+theme_override_styles/panel = SubResource("StyleBoxFlat_5vmol")
+current_tab = 1
+
+[node name="Coins" type="Sprite2D" parent="Camera2D/UI/TabContainer"]
+position = Vector2(777.143, -40)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("3_p56k5")
+
+[node name="CoinLabel" type="Label" parent="Camera2D/UI/TabContainer/Coins"]
+offset_left = 289.999
+offset_top = -89.9998
+offset_right = 1350.0
+offset_bottom = 120.0
+theme_override_font_sizes/font_size = 175
+text = "50"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Decks" type="TabBar" parent="Camera2D/UI/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Packs" type="TabBar" parent="Camera2D/UI/TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="GridContainer" type="GridContainer" parent="Camera2D/UI/TabContainer/Packs"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 19.0
+offset_right = 870.0
+offset_bottom = 339.0
+theme_override_constants/h_separation = 160
+theme_override_constants/v_separation = 60
+columns = 3
+
+[node name="BasicPack" type="TextureButton" parent="Camera2D/UI/TabContainer/Packs/GridContainer"]
+layout_mode = 2
+texture_normal = ExtResource("4_h7bo6")
+script = ExtResource("5_vvnpa")
+metadata/_edit_use_anchors_ = true
+
+[node name="Shadow" type="Sprite2D" parent="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack"]
+visible = false
+modulate = Color(0, 0, 0, 0.301961)
+position = Vector2(43.9998, 235.93)
+scale = Vector2(1.02174, 0.0664063)
+texture = ExtResource("4_h7bo6")
+offset = Vector2(82, 114)
+
+[node name="CardSelected" type="AudioStreamPlayer2D" parent="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack"]
+position = Vector2(-14, -3)
+stream = ExtResource("6_et4lf")
+volume_db = 0.839
+
+[node name="CardUnselected" type="AudioStreamPlayer2D" parent="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack"]
+position = Vector2(-14, -3)
+stream = ExtResource("7_qyg2m")
+volume_db = 0.839
+
+[node name="Sprite2D" type="Sprite2D" parent="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack"]
+position = Vector2(108, 259.875)
+scale = Vector2(0.0595, 0.0595)
+texture = ExtResource("3_p56k5")
+
+[node name="Label" type="Label" parent="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 247.875
+offset_right = 190.0
+offset_bottom = 272.875
+text = "  10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Abilities" type="TabBar" parent="Camera2D/UI/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="AbilitiesTab" type="Node2D" parent="Camera2D/UI/TabContainer/Abilities"]
+position = Vector2(-200, -141)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Camera2D/UI/TabContainer/Abilities/AbilitiesTab"]
+offset_left = 221.0
+offset_top = 155.0
+offset_right = 1076.0
+offset_bottom = 495.0
+
+[node name="MarginContainer" type="MarginContainer" parent="Camera2D/UI/TabContainer/Abilities/AbilitiesTab/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+
+[node name="GridContainer" type="GridContainer" parent="Camera2D/UI/TabContainer/Abilities/AbilitiesTab/ScrollContainer/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 160
+theme_override_constants/v_separation = 60
+columns = 3
+
+[node name="Map" type="Sprite2D" parent="Camera2D/UI"]
+visible = false
+light_mask = 2
+visibility_layer = 2
+position = Vector2(2.16092, -2.38419e-06)
+scale = Vector2(3.67816, 3.07143)
+texture = ExtResource("8_kqrys")
+
+[node name="Worlds" type="Node2D" parent="Camera2D/UI/Map"]
+position = Vector2(-25.6, -18.2326)
+scale = Vector2(0.10875, 0.130233)
+
+[node name="World 01" type="TextureButton" parent="Camera2D/UI/Map/Worlds"]
+offset_left = -71.0
+offset_top = 16.0
+offset_right = 74.0
+offset_bottom = 228.0
+texture_normal = ExtResource("9_6wm85")
+script = ExtResource("5_vvnpa")
+metadata/_edit_use_anchors_ = true
+
+[node name="Shadow" type="Sprite2D" parent="Camera2D/UI/Map/Worlds/World 01"]
+visible = false
+modulate = Color(0, 0, 0, 0.301961)
+position = Vector2(5.18735, 236.55)
+scale = Vector2(0.962727, 0.0916666)
+texture = ExtResource("10_lrnp3")
+offset = Vector2(82, 114)
+
+[node name="Sprite2D" type="Sprite2D" parent="Camera2D/UI/Map/Worlds/World 01"]
+visible = false
+position = Vector2(144, 215)
+scale = Vector2(0.1635, 0.1635)
+texture = ExtResource("3_p56k5")
+
+[node name="CardSelected" type="AudioStreamPlayer2D" parent="Camera2D/UI/Map/Worlds/World 01"]
+stream = ExtResource("6_et4lf")
+volume_db = 0.839
+
+[node name="CardUnselected" type="AudioStreamPlayer2D" parent="Camera2D/UI/Map/Worlds/World 01"]
+stream = ExtResource("7_qyg2m")
+volume_db = 0.839
+
+[node name="World 02" type="TextureButton" parent="Camera2D/UI/Map/Worlds"]
+offset_left = 147.0
+offset_top = 19.0
+offset_right = 315.0
+offset_bottom = 259.0
+texture_normal = ExtResource("11_syrn2")
+script = ExtResource("5_vvnpa")
+metadata/_edit_use_anchors_ = true
+
+[node name="Shadow" type="Sprite2D" parent="Camera2D/UI/Map/Worlds/World 02"]
+visible = false
+modulate = Color(0, 0, 0, 0.301961)
+position = Vector2(5.18735, 236.55)
+scale = Vector2(0.962727, 0.0916666)
+texture = ExtResource("10_lrnp3")
+offset = Vector2(82, 114)
+
+[node name="Sprite2D" type="Sprite2D" parent="Camera2D/UI/Map/Worlds/World 02"]
+visible = false
+position = Vector2(143, 216)
+scale = Vector2(0.197, 0.197)
+texture = ExtResource("3_p56k5")
+
+[node name="CardSelected" type="AudioStreamPlayer2D" parent="Camera2D/UI/Map/Worlds/World 02"]
+stream = ExtResource("6_et4lf")
+volume_db = 0.839
+
+[node name="CardUnselected" type="AudioStreamPlayer2D" parent="Camera2D/UI/Map/Worlds/World 02"]
+stream = ExtResource("7_qyg2m")
+volume_db = 0.839
+
+[node name="World 03" type="TextureButton" parent="Camera2D/UI/Map/Worlds"]
+offset_left = 382.0
+offset_top = 22.0
+offset_right = 523.0
+offset_bottom = 225.0
+texture_normal = ExtResource("11_syrn2")
+script = ExtResource("5_vvnpa")
+metadata/_edit_use_anchors_ = true
+
+[node name="Shadow" type="Sprite2D" parent="Camera2D/UI/Map/Worlds/World 03"]
+visible = false
+modulate = Color(0, 0, 0, 0.301961)
+position = Vector2(5.18738, 236.55)
+scale = Vector2(0.962727, 0.0916666)
+texture = ExtResource("10_lrnp3")
+offset = Vector2(82, 114)
+
+[node name="Sprite2D" type="Sprite2D" parent="Camera2D/UI/Map/Worlds/World 03"]
+visible = false
+position = Vector2(145, 220)
+scale = Vector2(0.1885, 0.1885)
+texture = ExtResource("3_p56k5")
+
+[node name="CardSelected" type="AudioStreamPlayer2D" parent="Camera2D/UI/Map/Worlds/World 03"]
+stream = ExtResource("6_et4lf")
+volume_db = 0.839
+
+[node name="CardUnselected" type="AudioStreamPlayer2D" parent="Camera2D/UI/Map/Worlds/World 03"]
+stream = ExtResource("7_qyg2m")
+volume_db = 0.839
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="Camera2D"]
+
+[node name="ColorRect" type="ColorRect" parent="Camera2D/CanvasLayer2"]
+material = SubResource("ShaderMaterial_r2agd")
+offset_right = 958.0
+offset_bottom = 541.0
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[connection signal="mouse_entered" from="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack" to="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack" to="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack" method="_on_mouse_exited"]
+[connection signal="pressed" from="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack" to="Camera2D/UI/TabContainer/Packs/GridContainer/BasicPack" method="_on_basic_pack_pressed"]
+[connection signal="mouse_entered" from="Camera2D/UI/Map/Worlds/World 01" to="Camera2D/UI/Map/Worlds/World 01" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Camera2D/UI/Map/Worlds/World 01" to="Camera2D/UI/Map/Worlds/World 01" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="Camera2D/UI/Map/Worlds/World 02" to="Camera2D/UI/Map/Worlds/World 02" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Camera2D/UI/Map/Worlds/World 02" to="Camera2D/UI/Map/Worlds/World 02" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="Camera2D/UI/Map/Worlds/World 03" to="Camera2D/UI/Map/Worlds/World 03" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Camera2D/UI/Map/Worlds/World 03" to="Camera2D/UI/Map/Worlds/World 03" method="_on_mouse_exited"]

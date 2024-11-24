@@ -8,6 +8,8 @@ extends Node2D
 @onready var EnemyChipCount: Label = $UI/EnemyChipCount
 @onready var BetText: Label = $UI/BetAmount
 @onready var BetSlider: Slider = $UI/BetSlider
+@onready var StopWatch = $Timer
+@onready var StopWatchLabel = $Timer
 
 @onready var CardSuitsList = ["Club", "Diamond", "Heart", "Spade"]
 var cardvalue = 1
@@ -283,7 +285,11 @@ func update_card_state(card_index: int, x_pos: float, y_pos: float) -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	pass
+	update_stopwatch_label()
+
+func update_stopwatch_label():
+	StopWatchLabel.text = StopWatch.time_to_string()
+
 
 @rpc("any_peer")
 func _on_bet_pressed() -> void:
@@ -303,7 +309,19 @@ func _on_bet_pressed() -> void:
 	var ClientHasBet = GameManager.Players[others_id]["HasBet"]
 	
 	if ServerHasBet == true and ClientHasBet == true:
-		InitializeCards.rpc_id(1)
+		if is_multiplayer_authority():
+			var others_ids
+	
+			for id in GameManager.Players.keys():
+				if id != my_id:
+					others_ids = id
+			InitializeCards()
+			StopWatch.started = true
+			StartStopWatch.rpc_id(others_id)
+		else:
+			InitializeCards.rpc_id(1)
+			StopWatch.started = true
+			StartStopWatch.rpc_id(1)
 
 @rpc("any_peer")
 func UpdateBetVar(id, betamount, hasBet):
@@ -402,11 +420,11 @@ func EndOfRound():
 	
 	if ClientScore > ServerScore:
 		if ClientBetAmount >= ServerBetAmount:
-			GameManager.Players[my_id]["ChipCount"] += ServerBetAmount
-			GameManager.Players[others_id]["ChipCount"] -= ServerBetAmount
+			GameManager.Players[others_id]["ChipCount"] += ServerBetAmount
+			GameManager.Players[my_id]["ChipCount"] -= ServerBetAmount
 		if ServerBetAmount < ClientBetAmount:
-			GameManager.Players[my_id]["ChipCount"] += ClientBetAmount
-			GameManager.Players[others_id]["ChipCount"] -= ClientBetAmount
+			GameManager.Players[others_id]["ChipCount"] += ClientBetAmount
+			GameManager.Players[my_id]["ChipCount"] -= ClientBetAmount
 	
 	if ServerScore == ClientScore:
 		print("Tie")
@@ -506,3 +524,7 @@ func ResetCards():
 		connect("server_cards_given", Callable(self, "_on_server_cards_given"))
 		GiveServerPlayerCards()
 	connect("client_cards_given", Callable(self, "_on_client_cards_given"))
+
+@rpc("any_peer")
+func StartStopWatch():
+	StopWatch.started = true

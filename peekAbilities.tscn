@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://1d2xa71po5qg"]
+
+[ext_resource type="Script" path="res://Scene/AbilityCard.gd" id="1_30p6c"]
+[ext_resource type="Texture2D" uid="uid://bnsps6w0ygn6h" path="res://CardAssets/card_binoculars-export.png" id="2_hj6xt"]
+[ext_resource type="AudioStream" uid="uid://d01bmokps3xxd" path="res://Audio/CardSelected (2).mp3" id="3_d70jp"]
+[ext_resource type="AudioStream" uid="uid://btkcud1bccupb" path="res://Audio/CardUnselected.mp3" id="4_jn4lg"]
+
+[node name="Peek" type="TextureButton"]
+offset_right = 168.0
+offset_bottom = 240.0
+texture_normal = ExtResource("2_hj6xt")
+script = ExtResource("1_30p6c")
+metadata/_edit_use_anchors_ = true
+
+[node name="Shadow" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(0, 0, 0, 0.301961)
+position = Vector2(3.94048, 236.275)
+scale = Vector2(0.970238, 0.0458335)
+texture = ExtResource("2_hj6xt")
+offset = Vector2(82, 114)
+
+[node name="CardSelected" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_d70jp")
+volume_db = 0.839
+
+[node name="CardUnselected" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_jn4lg")
+volume_db = 0.839
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
+[connection signal="pressed" from="." to="." method="_on_peek_pressed"]

@@ -1,6 +1,9 @@
 @tool
 class_name Hand extends Node2D
 
+@onready var StopWatch = $"../Timer"
+
+
 var gamemanager
 
 var PlayerScore
@@ -21,6 +24,8 @@ func _ready() -> void:
 		gamemanager = $".."
 	if GameManager.Offline == true:
 		gamemanager = $"../.."
+	if GameManager.Practice == true:
+		StopWatch = $"../../Timer"
 
 func evaluate_hand():
 	
@@ -37,12 +42,6 @@ func evaluate_hand():
 	for value in value_counts:
 		sorted_value_counts.append([value, value_counts[value]])
 		
-
-	sorted_value_counts.sort_custom(func(a, b):
-		if a[1] == b[1]:
-			return b[0] - a[0]
-		return b[1] - a[1]
-	)
 	
 	var counts = []
 	for pair in sorted_value_counts:
@@ -53,6 +52,10 @@ func evaluate_hand():
 	var is_flush = is_flush()
 	var is_straight = is_straight(sorted_value_counts)
 	print(sorted_value_counts)
+	
+	sorted_value_counts.sort_custom(_compare_by_value)
+	sorted_value_counts.sort_custom(func(a, b): return a[1] > b[1])
+	
 	PlayerHand = sorted_value_counts
 	print(counts)
 	if is_flush and is_straight and cards[0].value == 10:
@@ -108,7 +111,13 @@ func evaluate_hand():
 			PlayerScore += cards[i].value * (0.01 / (i + 1))
 		
 	pass
-	
+
+func _compare_by_value(a, b) -> int:
+	return a[0] - b[0]
+
+func _compare_by_frequency(a, b) -> int:
+	return b[1] - a[1]
+
 func _compare_cards(a: Card, b: Card) -> int:
 	return a.value - b.value
 
@@ -158,11 +167,19 @@ func get_selected_cards(Index: int) -> Array:
 	for i in range (get_child_count()):
 		var child = get_child(i)
 		cards.append(child)
-	if cards.size() > 4 and RoundDone == false:
-		evaluate_hand()
-		#print(BotScore)
-		gamemanager.SetScore(PlayerScore, BotScore, PlayerHand, BotHand)
-		RoundDone = true
+		selected_cards_array.append(child)
+		print(cards)
+		if cards.size() == 5:
+			evaluate_hand()
+			gamemanager.SetScore(PlayerScore, BotScore, PlayerHand, BotHand)
+			RoundDone = true
+		if GameManager.Online == true:
+			var TimerMult = StopWatch.time / 10
+			var PlayerMult = 1 + TimerMult
+			PlayerScore *= PlayerMult
+			print(PlayerMult)
+			StopWatch.started = false
+			StopWatch.reset()
 	return selected_cards_array
 
 func Tie_Breaker(PlayerHand, EnemyHand) -> int:
@@ -229,7 +246,8 @@ func BotPickBestHand(all_cards: Array):
 		
 		if score > best_score:
 			best_score = score
-			
+			#print(combination)
+			#print(score)
 			if best_score > BotScore:
 				BotScore = best_score
 				best_hand = combination.duplicate()
@@ -273,11 +291,7 @@ func evaluate_bot_hand(hand: Array):
 		sorted_value_counts.append([value, value_counts[value]])
 		
 
-	sorted_value_counts.sort_custom(func(a, b):
-		if a[1] == b[1]:
-			return b[0] - a[0]
-		return b[1] - a[1]
-	)
+
 	
 	var counts = []
 	for pair in sorted_value_counts:
@@ -287,6 +301,10 @@ func evaluate_bot_hand(hand: Array):
 	BotHand = hand
 	var is_flush = is_flush_bot()
 	var is_straight = is_straight_bot(sorted_value_counts)
+	
+	sorted_value_counts.sort_custom(_compare_by_value)
+	sorted_value_counts.sort_custom(func(a, b): return a[1] > b[1])
+	
 	BotHand = sorted_value_counts
 	
 	

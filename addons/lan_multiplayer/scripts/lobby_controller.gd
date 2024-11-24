@@ -11,6 +11,7 @@ extends Control
 #LOBBY INTEGRATION
 #1.1 Host & Join Signals
 func _on_host_button_pressed():
+	print("works")
 	reset_buttons()
 	hide_host_and_join_buttons()
 	$host/ip_address.show()

@@ -7,8 +7,11 @@ class_name Card extends Button
 
 @onready var base_sprite: Sprite2D = $Sprite2D
 @onready var Shadow = $Shadow
+@onready var CardSound = get_node("CardSelected")
+@onready var CardUnselectedSound = get_node("CardUnselected")
 
 var gamemanager
+var AceUsed = false
 
 
 @onready var my_sprite = $Sprite2D
@@ -58,6 +61,8 @@ func _process(delta: float) -> void:
 
 
 func _on_pressed() -> void:
+	if GlobalVariable.Blackjack == true:
+		return
 	if EnemyCard == true:
 		return
 	if CardClicked == true:
@@ -73,11 +78,17 @@ func _on_pressed() -> void:
 
 
 func _on_mouse_entered() -> void:
+	if GlobalVariable.Blackjack == true:
+		return
 	if EnemyCard == true:
 		return
+	if gamemanager.ClickedCardNum >= 5:
+		return
 	if CardClicked == false:
+		print(gamemanager.ClickedCardNum)
 		self.position += Vector2(+0,-12)
 		Shadow.visible = true
+		CardSound.play()
 		pass
 	
 	pass
@@ -86,11 +97,16 @@ func _on_mouse_entered() -> void:
 
 
 func _on_mouse_exited() -> void:
+	if GlobalVariable.Blackjack == true:
+		return
 	if EnemyCard == true:
+		return
+	if gamemanager.ClickedCardNum >= 5:
 		return
 	if CardClicked == false:
 		self.position += Vector2(+0,12)
 		Shadow.visible = false
+		#CardUnselectedSound.play()
 		pass
 	
 	pass # Replace with function body.

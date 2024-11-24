@@ -5,8 +5,10 @@ var Players = {}
 var ServerEnemyCard1
 var ServerEnemyCard2
 
-var Online =  true
+var Online =  false
 var Offline = false
+
+var Practice = false
 
 @rpc("any_peer")
 func update_player_info(player_id, card1_index, card2_index):

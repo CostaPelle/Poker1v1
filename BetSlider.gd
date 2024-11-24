@@ -9,7 +9,7 @@ extends VSlider
 func _ready() -> void:
 	
 	self.max_value = GameManager.PlayerChips
-	
+	self.value = 0
 	pass # Replace with function body.
 
 

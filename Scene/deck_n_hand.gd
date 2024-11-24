@@ -2,15 +2,17 @@
 extends Node2D
 
 
+
 @onready var CardScene: PackedScene = preload("res://Scene/Main.tscn")
 @onready var spawn_point = $CanvasLayer/Deck
 
 @onready var CardSuitsList = ["Club", "Diamond", "Heart", "Spade"]
 
 var save_path = "res://SavedData/level.save"
+#var save_path = "user+0.
 
 #PlayerVariables
-@export var PlayerChips: int = 50000
+@export var PlayerChips = 50000
 var BetAmount: int
 var PlayerScore = 0
 var PlayersCards: bool
@@ -21,6 +23,10 @@ var Level1: bool
 var Level2: bool
 var Level3: bool
 var WinMethod: int
+var stopwatch: bool
+var ClickedCardNum = 0
+var PeekUsed = false
+var HandRerollUsed = false
 
 #EnemyVariables
 @export var EnemyChips: int = 50000
@@ -28,6 +34,7 @@ var EnemyScore = 0
 var EnemyCard1Texture
 var EnemyCard2Texture
 var enemycard1
+var enemycard2
 
 #Buttons
 @onready var PlayButton = $CanvasLayer/Play
@@ -42,32 +49,85 @@ var enemycard1
 @onready var NextButton = $CanvasLayer/NextButton
 @onready var Level1UI = $TextureRect/Sprite2D
 @onready var Level1Des = $TextureRect/Level1Des
+@onready var timer = $Timer
+@onready var MenuUI = $CanvasLayer/MenuUI
+@onready var PlusChip = $Animations/PlusChip
+@onready var MinusChip = $Animations/MinusChip
+@onready var LevelManager = $LevelManager
 
 var Current_Sprite = 0
 var cardvalue = 1
 var FlopDown = false
 var TurnDown = false
 
-
+var LifelineAbilityUsed = false
+var PeekAbility1: bool
+var HandRerollAbility1: bool
+var LifelineAbility1: bool
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	load_data()
+	PeekAbility1 = GlobalVariable.PeekAbility
+	HandRerollAbility1 = GlobalVariable.HandRerollAbility
+	LifelineAbility1 = GlobalVariable.LifeLineAbility
+	WinMethod = GlobalVariable.winmethod
+	stopwatch = GlobalVariable.stopwatch
+	PlayerChips = GlobalVariable.GameData["PlayerCoins"]
 	
-	if Level3 == false and Level2 == true and Level1 == true:
-		WinMethod = 1000000
-	if Level3 == false and Level2 == false and Level1 == true:
-		WinMethod = 500000
-	if Level3 == false and Level2 == false and Level1 == false:
-		WinMethod = 250000
-	pass # Replace with function body.
+	GlobalVariable.PeekAbility = false
+	GlobalVariable.HandRerollAbility = false
+	GlobalVariable.LifeLineAbility = false
+	
+	if PeekAbility1 == true:
+		GlobalVariable.GameData["PeekCount"] -= 1
+	if HandRerollAbility1 == true:
+		GlobalVariable.GameData["HandrerollCount"] -= 1
+	if LifelineAbility1 == true:
+		GlobalVariable.GameData["LifelineCount"] -= 1
+	
+	if GlobalVariable.level == 1:
+		$TextureRect/Level1Des.set_text("Poker Blitz: 
+	A fast paced 1-on-1 Poker game
+	where the player only has
+	6 seconds to select his best 
+	hand
+	
+	
+	
+	Keep in mind that Ties lose you
+	1/2 of how much you bet")
+
+	if GlobalVariable.level == 2:
+		$TextureRect/Level1Des.set_text("Win 500 Chips in 4 minutes 
+	to advance to the next level.
+	
+	
+	
+	Keep in mind that Ties lose you
+	1/2 of how much you bet")
+
+	if GlobalVariable.level == 3:
+		$TextureRect/Level1Des.set_text("BOSS: Local Casino
+
+	Try to win 1,000 Chips in
+	3 minutes while only having 3
+	seconds to select cards
 
 
+
+	You will be handicapped")
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):  # "ui_cancel" maps to the Escape key by default in Godot
+		toggle_menu()
+
+func toggle_menu():
+	MenuUI.visible = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	
 	pass
 
 
@@ -79,6 +139,9 @@ func _on_button_pressed() -> void:
 	BetButton.visible = true
 	BetSlider.visible = true
 	PokerChip.visible = true
+	timer.visible = true
+	if stopwatch == true:
+		$StopWatch.visible = true
 	#EnemyChip.visible = true
 	#EnemyChipCount.visible = true
 	var EnemyHand = $CanvasLayer/EnemyHand
@@ -87,6 +150,7 @@ func _on_button_pressed() -> void:
 	var ClickedCards = $CanvasLayer/ClickedCards
 	var Deck = $CanvasLayer/Deck
 	
+	#timer.started = true
 	
 	if AbilityGiven == false:
 		GiveAbility1()
@@ -95,6 +159,7 @@ func _on_button_pressed() -> void:
 	EnemyChipCount.set_text(str(EnemyChips))
 	
 	PlayerChipsField.set_text(str(PlayerChips))
+	BetSlider.ResetSliderAmount()
 	var i = 0
 	while Current_Sprite < 52:
 		
@@ -145,12 +210,15 @@ func _on_button_pressed() -> void:
 		EnemyCard1.reparent(EnemyHand)
 			
 		var EnemyCard2 = Deck.get_child(randi() % Deck.get_child_count())
+		
+		enemycard2 = EnemyCard2
 			
 		EnemyCard2.set_visible(true)
 		EnemyCard2.position = Vector2(405,25)
 		EnemyCard2.scale = Vector2(.5,.5)
 		EnemyCard2.EnemyCard = true
 		var EnemyCard2Sprite = EnemyCard2.get_node("Sprite2D")
+		EnemyCard2Texture = EnemyCard2Sprite.texture.resource_path
 		EnemyCard2Sprite.texture = preload("res://CardAssets/assets/card_back.png")
 		EnemyCard2.reparent(EnemyHand)
 			
@@ -251,12 +319,23 @@ func RemoveChipsFromPlayer(NewBet):
 	
 	BotHand.BotPickBestHand(AllCards)
 	
+	if stopwatch == true:
+		$StopWatch.started = true
+	
 	pass
 	
 	
 func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
+	if stopwatch == true:
+		$StopWatch.started = false
+		$StopWatch.reset()
 	NextButton.visible = true
-	print(PlayerScore, EnemyScore)
+	var EnemyCard1Sprite = enemycard1.get_node("Sprite2D")
+	EnemyCard1Sprite.texture = load(EnemyCard1Texture)
+	
+	var EnemyCard2Sprite = enemycard2.get_node("Sprite2D")
+	EnemyCard2Sprite.texture = load(EnemyCard2Texture)
+	print(PlayerScore," ", EnemyScore)
 	var PlayersHand: Dictionary = {}
 
 	print(PlayersHand)
@@ -271,9 +350,7 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 		PlayerChipsField.text = str(PlayerChips)
 		NextButton.visible = true
 		BetSlider.ResetSliderAmount()
-		if PlayerChips >= WinMethod:
-			Win()
-			return
+		PlusChip.play()
 		return
 	if PlayerScore == EnemyScore:
 		if tie_result == 1:
@@ -283,14 +360,17 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 			PlayerChipsField.text = str(PlayerChips)
 			NextButton.visible = true
 			BetSlider.ResetSliderAmount()
-			if PlayerChips >= WinMethod:
-				Win()
-				return
+			PlusChip.play()
 			return
 		if tie_result == 2:
 			PlayerScoreLabel.visible = true
 			PlayerScoreLabel.text = "LOSE"
 			NextButton.visible = true
+			if LifelineAbilityUsed == true:
+				PlayerChips += BetAmount
+				LifelineAbilityUsed = false
+				return
+			MinusChip.play()
 			if PlayerChips <= 5:
 				Lose()
 				return
@@ -302,6 +382,7 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 			PlayerChipsField.text = str(PlayerChips)
 			BetSlider.ResetSliderAmount()
 			NextButton.visible = true
+			MinusChip.play()
 			if PlayerChips <= 5:
 				Lose()
 				return
@@ -310,10 +391,16 @@ func SetScore(PlayerScore, EnemyScore, PlayerHand, EnemyHand):
 		PlayerScoreLabel.visible = true
 		PlayerScoreLabel.text = "LOSE"
 		NextButton.visible = true
+		if LifelineAbilityUsed == true:
+			PlayerChips += BetAmount
+			LifelineAbilityUsed = false
+			return
+		MinusChip.play()
 		if PlayerChips <= 5:
 				Lose()
 				return
 		return
+	
 	pass
 	
 
@@ -363,13 +450,15 @@ func ResetCards():
 
 func ClickedCards(Index: int, player_cards: bool):
 	PlayersCards = player_cards
-	if PlayersCards == false:
+	if PlayersCards == false and ClickedCardNum <= 5:
 		var SelectedCard = $CanvasLayer/PlayedCards.get_child(Index)
 		SelectedCard.reparent($CanvasLayer/ClickedCards)
+		ClickedCardNum += 1
 		return
 	else:
 		var SelectedCard = $CanvasLayer/PlayerHand.get_child(Index)
 		SelectedCard.reparent($CanvasLayer/ClickedCards)
+		ClickedCardNum += 1
 
 func UnclickedCards(Index: int, player_cards: bool):
 	PlayersCards = player_cards
@@ -377,11 +466,13 @@ func UnclickedCards(Index: int, player_cards: bool):
 		var UnselectedCard = $CanvasLayer/ClickedCards.get_child(Index)
 		UnselectedCard.position.y += 12
 		UnselectedCard.reparent($CanvasLayer/PlayedCards)
+		ClickedCardNum -= 1
 		return
 	else:
 		var UnselectedCard = $CanvasLayer/ClickedCards.get_child(Index)
 		UnselectedCard.position.y += 12
 		UnselectedCard.reparent($CanvasLayer/PlayerHand)
+		ClickedCardNum -= 1
 	
 
 
@@ -390,59 +481,95 @@ func GiveAbility1():
 	
 	var PeekAbility = $CanvasLayer/Ability1/Peek
 	var HandRerollAbility = $CanvasLayer/Ability1/HandReroll
+	var LifelineAbility = $CanvasLayer/Ability2/Lifeline
 	var rng = randi_range(1, 1)
 	
-	if rng == 1:
+	if PeekAbility1 == true:
 		PeekAbility.visible = true
-	if rng == 2:
+		PeekAbility1 = false
+		return
+	if HandRerollAbility1 == true:
 		HandRerollAbility.visible = true
+		HandRerollAbility1 = false
+		return
+	if LifelineAbility1 == true:
+		LifelineAbility.visible = true
+		LifelineAbility1 = false
+		return
 	AbilityGiven = true
 	pass
 
 func GiveAbility2():
 	
-	var PeakAbility = $CanvasLayer/Ability2/Peek
+	var PeekAbility = $CanvasLayer/Ability2/Peek
 	var HandRerollAbility = $CanvasLayer/Ability2/HandReroll
+	var LifelineAbility = $CanvasLayer/Ability2/Lifeline
 	var rng = randi_range(1, 2)
 	
-	if rng == 1:
-		PeakAbility.visible = true
-	if rng == 2:
+	if PeekAbility1 == true:
+		PeekAbility.visible = true
+		PeekAbility1 = false
+		return
+	if HandRerollAbility1 == true:
 		HandRerollAbility.visible = true
+		HandRerollAbility1 = false
+		return
+	if LifelineAbility1 == true:
+		LifelineAbility.visible = true
+		LifelineAbility1 = false
+		return
 	AbilityGiven = true
 	pass
 
 func PeekAbility():
-	var EnemyCard1Sprite = enemycard1.get_node("Sprite2D")
-	EnemyCard1Sprite.texture = load(EnemyCard1Texture)
+	if PeekUsed == false:
+		var EnemyCard1Sprite = enemycard1.get_node("Sprite2D")
+		EnemyCard1Sprite.texture = load(EnemyCard1Texture)
+		PeekUsed = true
+		PeekTimer(30)
 
 func HandReroll():
 	var Deck = $CanvasLayer/Deck
 	var PlayerHand = $CanvasLayer/PlayerHand
 	
-	PlayerCard1.visible = false
-	PlayerCard1.reparent(Deck)
-	
-	var Card1 = Deck.get_child(randi() % Deck.get_child_count())
-	PlayerCard1 = Card1
+	if HandRerollUsed == false:
+		PlayerCard1.visible = false
+		PlayerCard1.reparent(Deck)
 		
-	Card1.set_visible(true)
-	Card1.position = Vector2(505,400)
-	Card1.scale = Vector2(.5,.5)
-	Card1.PlayerCard = true
-	Card1.reparent(PlayerHand)
-	
-	PlayerCard2.visible = false
-	PlayerCard2.reparent(Deck)
-	
-	var Card2 = Deck.get_child(randi() % Deck.get_child_count())
-	PlayerCard2 = Card2
-	print(Card2)
-	Card2.set_visible(true)
-	Card2.position = Vector2(405,400)
-	Card2.scale = Vector2(.5,.5)
-	Card2.PlayerCard = true
-	Card2.reparent(PlayerHand)
+		var Card1 = Deck.get_child(randi() % Deck.get_child_count())
+		PlayerCard1 = Card1
+			
+		Card1.set_visible(true)
+		Card1.position = Vector2(505,400)
+		Card1.scale = Vector2(.5,.5)
+		Card1.PlayerCard = true
+		Card1.reparent(PlayerHand)
+		
+		PlayerCard2.visible = false
+		PlayerCard2.reparent(Deck)
+		
+		var Card2 = Deck.get_child(randi() % Deck.get_child_count())
+		PlayerCard2 = Card2
+		print(Card2)
+		Card2.set_visible(true)
+		Card2.position = Vector2(405,400)
+		Card2.scale = Vector2(.5,.5)
+		Card2.PlayerCard = true
+		Card2.reparent(PlayerHand)
+		HandRerollUsed = true
+		HandRerollTimer(60)
+
+func LifelineAbility():
+	LifelineAbilityUsed = true
+
+func PeekTimer(delay: float):
+	await get_tree().create_timer(delay).timeout
+	PeekUsed = false
+	print("done")
+
+func HandRerollTimer(delay: float):
+	await get_tree().create_timer(delay).timeout
+	HandRerollUsed = false
 
 func Win():
 	var WinLabel = $WinLabel
@@ -451,6 +578,10 @@ func Win():
 	CanvasLayer1.visible = false
 	WinLabel.visible = true
 	NextButton.visible = true
+	GlobalVariable.GameData["PlayerCoins"] = PlayerChips
+	GlobalVariable.GameData["Day"] += 1
+	GlobalVariable.GameData["LoanDaysLeft"] -= 1
+	GlobalVariable.save()
 
 func Lose():
 	var LoseLabel = $LoseLabel
@@ -462,12 +593,6 @@ func Lose():
 
 func _on_win_button_pressed() -> void:
 	
-	if Level3 == false and Level2 == true and Level1 == true:
-		Level3 = true
-	if Level3 == false and Level2 == false and Level1 == true:
-		Level2 = true
-	if Level3 == false and Level2 == false and Level1 == false:
-		Level1 = true
 	
 	save()
 	
@@ -479,7 +604,14 @@ func _on_win_button_pressed() -> void:
 func _on_retry_button_pressed() -> void:
 	
 	
-	get_tree().reload_current_scene()
+	get_tree().change_scene_to_file("res://Scene/MainMenu.tscn")
+	GameManager.Online = false
+	GameManager.Offline = false
+	GlobalVariable.GameData["PlayerCoins"] = PlayerChips
+	print(GlobalVariable.GameData["PlayerCoins"])
+	GlobalVariable.GameData["Day"] += 1
+	GlobalVariable.GameData["LoanDaysLeft"] -= 1
+	GlobalVariable.save()
 	
 	
 	pass # Replace with function body.
@@ -498,6 +630,23 @@ func load_data():
 		Level2 = file.get_var(Level2)
 		Level3 = file.get_var(Level3)
 	else:
-		Level1 = false
-		Level2 = false
-		Level3 = false
+		print("no saved file")
+
+
+func _on_quit_pressed() -> void:
+	get_tree().change_scene_to_file("res://Scene/MainMenu.tscn")
+	GameManager.Online = false
+	GameManager.Offline = false
+	GlobalVariable.GameData["PlayerCoins"] = PlayerChips
+	print(GlobalVariable.GameData["PlayerCoins"])
+	GlobalVariable.GameData["Day"] += 1
+	GlobalVariable.GameData["LoanDaysLeft"] -= 1
+	GlobalVariable.save()
+
+
+func _on_resume_pressed() -> void:
+	MenuUI.visible = false
+
+
+func _on_play_pressed() -> void:
+	pass # Replace with function body.

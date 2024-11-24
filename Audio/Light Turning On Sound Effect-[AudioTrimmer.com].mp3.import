@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://c4xkdfbco00lv"
+path="res://.godot/imported/Light Turning On Sound Effect-[AudioTrimmer.com].mp3-53077df5475b9e57a4517327ee966966.mp3str"
+
+[deps]
+
+source_file="res://Audio/Light Turning On Sound Effect-[AudioTrimmer.com].mp3"
+dest_files=["res://.godot/imported/Light Turning On Sound Effect-[AudioTrimmer.com].mp3-53077df5475b9e57a4517327ee966966.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

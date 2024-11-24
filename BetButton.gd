@@ -21,10 +21,18 @@ func _pressed() -> void:
 
 
 func _on_pressed() -> void:
+	if BetSlider.BetAmount <= 0:
+		return
+	#if BetSlider.BetAmount > GlobalVariable.MaxBetAmount:
+		#return
 	if Pressed == false:
 		GameManager.RemoveChipsFromPlayer(BetSlider.BetAmount)
 		BetSlider.ResetSliderAmount()
 		Pressed = true
+		
+		if GlobalVariable.Blackjack == true:
+			GameManager.RoundStart()
+		
 		pass # Replace with function body.
 	else:
 		print("Already bet")

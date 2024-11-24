@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://ce846fjqu4b00"]
+[gd_scene load_steps=5 format=3 uid="uid://ce846fjqu4b00"]
 
 [ext_resource type="Script" path="res://Scripts/card.gd" id="1_p3y8i"]
 [ext_resource type="Texture2D" uid="uid://vplv17m7ygvk" path="res://CardAssets/card_joker_red.png" id="2_1wciv"]
+[ext_resource type="AudioStream" uid="uid://d01bmokps3xxd" path="res://Audio/CardSelected (2).mp3" id="3_2iicc"]
+[ext_resource type="AudioStream" uid="uid://btkcud1bccupb" path="res://Audio/CardUnselected.mp3" id="4_g5vws"]
 
 [node name="Card" type="Button"]
 visibility_layer = 513
@@ -23,6 +25,14 @@ offset = Vector2(82, 114)
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_1wciv")
 offset = Vector2(82, 114)
+
+[node name="CardSelected" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_2iicc")
+volume_db = 0.839
+
+[node name="CardUnselected" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_g5vws")
+volume_db = 0.839
 
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
